@@ -15,29 +15,28 @@ CMapzone::~CMapzone()
     if (m_pos)
     {
         delete m_pos;
-        m_pos = NULL;
+        m_pos = nullptr;
     }
     if (m_rot)
     {
         delete m_rot;
-        m_rot = NULL;
+        m_rot = nullptr;
     }
     if (m_scaleMins)
     {
         delete m_scaleMins;
-        m_scaleMins = NULL;
+        m_scaleMins = nullptr;
     }
     if (m_scaleMaxs)
     {
         delete m_scaleMaxs;
-        m_scaleMaxs = NULL;
+        m_scaleMaxs = nullptr;
     }
 }
 
 CMapzone::CMapzone(const int pType, Vector* pPos, QAngle* pRot, Vector* pScaleMins,
     Vector* pScaleMaxs, const int pIndex, const bool pShouldStop, const bool pShouldTilt,
-    const float pHoldTime, const bool pLimitSpeed,
-    const float pMaxLeaveSpeed, const float flYaw,
+    const float pHoldTime, const bool pLimitSpeed, const float pBhopLeaveSpeed, const float flYaw,
     const string_t pLinkedEnt, const bool pCheckOnlyXY)
 {
     m_type = pType;
@@ -50,7 +49,7 @@ CMapzone::CMapzone(const int pType, Vector* pPos, QAngle* pRot, Vector* pScaleMi
     m_shouldResetAngles = pShouldTilt;
     m_holdTimeBeforeTeleport = pHoldTime;
     m_limitingspeed = pLimitSpeed;
-    m_maxleavespeed = pMaxLeaveSpeed;
+    m_bhopleavespeed = pBhopLeaveSpeed;
     m_yaw = flYaw;
     m_linkedent = pLinkedEnt;
     m_onlyxycheck = pCheckOnlyXY;
@@ -63,8 +62,7 @@ void CMapzone::SpawnZone()
     case MOMZONETYPE_START:
         m_trigger = (CTriggerTimerStart *) CreateEntityByName("trigger_momentum_timer_start");
         ((CTriggerTimerStart *) m_trigger)->SetIsLimitingSpeed(m_limitingspeed);
-        ((CTriggerTimerStart *) m_trigger)->SetMaxLeaveSpeed(m_maxleavespeed);
-        ((CTriggerTimerStart *) m_trigger)->SetIsLimitingSpeedOnlyXY(m_onlyxycheck);
+        ((CTriggerTimerStart *) m_trigger)->SetMaxLeaveSpeed(m_bhopleavespeed);
         if ( m_yaw != NO_LOOK )
         {
             ((CTriggerTimerStart *) m_trigger)->SetHasLookAngles(true);
@@ -76,7 +74,7 @@ void CMapzone::SpawnZone()
         }
         
         m_trigger->SetName(MAKE_STRING("Start Trigger"));
-        g_Timer.SetStartTrigger((CTriggerTimerStart *) m_trigger);
+        g_Timer->SetStartTrigger((CTriggerTimerStart *) m_trigger);
         break;
     case MOMZONETYPE_CP:
         m_trigger = (CTriggerCheckpoint *) CreateEntityByName("trigger_momentum_timer_checkpoint");
@@ -85,7 +83,7 @@ void CMapzone::SpawnZone()
         break;
     case MOMZONETYPE_STOP:
         m_trigger = (CTriggerTimerStop *) CreateEntityByName("trigger_momentum_timer_stop");
-        m_trigger->SetName(MAKE_STRING("Ending Trigger"));
+        m_trigger->SetName(MAKE_STRING("End Trigger"));
         break;
     case MOMZONETYPE_ONEHOP:
         m_trigger = (CTriggerOnehop *) CreateEntityByName("trigger_momentum_onehop");
@@ -144,19 +142,18 @@ void CMapzone::SpawnZone()
 static void saveZonFile(const char* szMapName)
 {
     KeyValues* zoneKV = new KeyValues(szMapName);
-    CBaseEntity* pEnt = gEntList.FindEntityByClassname(NULL, "trigger_momentum_*");
+    CBaseEntity* pEnt = gEntList.FindEntityByClassname(nullptr, "trigger_momentum_*");
     while (pEnt)
     {
-        KeyValues* subKey = NULL;
+        KeyValues* subKey = nullptr;
         if (pEnt->ClassMatches("trigger_momentum_timer_start"))
         {
             CTriggerTimerStart* pTrigger = dynamic_cast<CTriggerTimerStart*>(pEnt);
             subKey = new KeyValues("start");
             if (pTrigger)
             {
-                subKey->SetFloat("leavespeed", pTrigger->GetMaxLeaveSpeed());
+                subKey->SetFloat("bhopleavespeed", pTrigger->GetMaxLeaveSpeed());
                 subKey->SetBool("limitingspeed", pTrigger->IsLimitingSpeed());
-                subKey->SetBool("onlyxy", pTrigger->IsLimitingSpeedOnlyXY());
                 if (pTrigger->GetHasLookAngles())
                     subKey->SetFloat("yaw", pTrigger->GetLookAngles()[YAW] );
             }
@@ -249,7 +246,7 @@ static void saveZonFile(const char* szMapName)
         char zoneFilePath[MAX_PATH];
         Q_strcpy(zoneFilePath, "maps/");
         Q_strcat(zoneFilePath, szMapName, MAX_PATH);
-        Q_strncat(zoneFilePath, ".zon", MAX_PATH);
+        Q_strncat(zoneFilePath, EXT_ZONE_FILE, MAX_PATH);
         zoneKV->SaveToFile(filesystem, zoneFilePath, "MOD");
         zoneKV->deleteThis();
     }
@@ -265,13 +262,12 @@ CMapzoneData::CMapzoneData(const char *szMapName)
     }
 }
 
-//MOM_TODO: Get rid of the following method and ConCommand
 static void saveZonFile_f()
 {
     saveZonFile(gpGlobals->mapname.ToCStr());
 }
 
-static ConCommand mom_generate_zone_file("mom_generate_zone_file", saveZonFile_f, "Generates a zone file.");
+static ConCommand mom_generate_zone_file("mom_zone_generate", saveZonFile_f, "Generates a zone file.");
 
 CMapzoneData::~CMapzoneData()
 {
@@ -290,17 +286,21 @@ bool CMapzoneData::MapZoneSpawned(CMapzone *mZone)
     if ( !ZoneTypeToClass( mZone->GetType(), name ) ) return false;
 
 
-    CBaseEntity *pEnt = gEntList.FindEntityByClassname(NULL, name);
+    CBaseEntity *pEnt = gEntList.FindEntityByClassname(nullptr, name);
     while (pEnt)
     {
         if (pEnt->GetAbsOrigin() == *mZone->GetPosition()
-            && pEnt->GetAbsAngles() == *mZone->GetRotation()
-            && pEnt->WorldAlignMaxs() == *mZone->GetScaleMaxs()
-            && pEnt->WorldAlignMins() == *mZone->GetScaleMins())
+            && pEnt->GetAbsAngles() == *mZone->GetRotation())
         {
-            DevLog("Already found a %s spawned on the map! Not spawning it from zone file...\n", name);
-            toReturn = true;
-            break;
+			// Only check WorldAlignMaxs/Mins if collision prop bounds are not in entity space, to avoid assertions
+			if (pEnt->CollisionProp()->IsBoundsDefinedInEntitySpace()
+				|| (pEnt->WorldAlignMaxs() == *mZone->GetScaleMaxs()
+				&& pEnt->WorldAlignMins() == *mZone->GetScaleMins()))
+			{
+				DevLog("Already found a %s spawned on the map! Not spawning it from zone file...\n", name);
+				toReturn = true;
+				break;
+			}
         }
 
         pEnt = gEntList.FindEntityByClassname(pEnt, name);
@@ -353,8 +353,8 @@ bool CMapzoneData::LoadFromFile(const char *szMapName)
             //int destinationIndex = -1;
             bool limitingspeed = true;
             bool checkonlyxy = true;
-            float maxleavespeed = 290.0f;
-            const char * linkedtrigger = NULL;
+            float bhopleavespeed = 250.0f;
+            const char * linkedtrigger = nullptr;
 
             float start_yaw = NO_LOOK;
 
@@ -362,9 +362,8 @@ bool CMapzoneData::LoadFromFile(const char *szMapName)
             {
                 zoneType = MOMZONETYPE_START;
                 limitingspeed = cp->GetBool("limitingspeed");
-                maxleavespeed = cp->GetFloat("leavespeed");
+                bhopleavespeed = cp->GetFloat("bhopleavespeed");
                 start_yaw = cp->GetFloat("yaw", NO_LOOK);
-                checkonlyxy = cp->GetBool("onlyxy", true);
             }
             else if (Q_strcmp(cp->GetName(), "checkpoint") == 0)
             {
@@ -382,7 +381,7 @@ bool CMapzoneData::LoadFromFile(const char *szMapName)
                 shouldTilt = cp->GetBool("resetang", true);
                 holdTime = cp->GetFloat("hold", 1);
                 //destinationIndex = cp->GetInt("destination", 1);
-                linkedtrigger = cp->GetString("destinationname", NULL);
+                linkedtrigger = cp->GetString("destinationname", nullptr);
             }
             else if (Q_strcmp(cp->GetName(), "resetonehop") == 0)
             {
@@ -394,7 +393,7 @@ bool CMapzoneData::LoadFromFile(const char *szMapName)
                 //destinationIndex = cp->GetInt("destination", -1);
                 shouldStop = cp->GetBool("stop", false);
                 shouldTilt = cp->GetBool("resetang", true);
-                linkedtrigger = cp->GetString("destinationname", NULL);
+                linkedtrigger = cp->GetString("destinationname", nullptr);
             }
             else if (Q_strcmp(cp->GetName(), "multihop") == 0)
             {
@@ -403,9 +402,9 @@ bool CMapzoneData::LoadFromFile(const char *szMapName)
                 shouldTilt = cp->GetBool("resetang", true);
                 holdTime = cp->GetFloat("hold", 1);
                 //destinationIndex = cp->GetInt("destination", 1);
-                linkedtrigger = cp->GetString("destinationname", NULL);
+                linkedtrigger = cp->GetString("destinationname", nullptr);
             }
-            else if (Q_strcmp(cp->GetName(), "stage") == 0)
+            else if (!Q_strcmp(cp->GetName(), "stage") || !Q_strcmp(cp->GetName(), "zone"))
             {
                 zoneType = MOMZONETYPE_STAGE;
                 index = cp->GetInt("number", 0);
@@ -418,7 +417,7 @@ bool CMapzoneData::LoadFromFile(const char *szMapName)
 
             // Add element
             m_zones.AddToTail(new CMapzone(zoneType, pos, rot, scaleMins, scaleMaxs, index, shouldStop, shouldTilt,
-                holdTime, limitingspeed, maxleavespeed, start_yaw, MAKE_STRING(linkedtrigger),checkonlyxy));
+                holdTime, limitingspeed, bhopleavespeed, start_yaw, MAKE_STRING(linkedtrigger), checkonlyxy));
         }
         DevLog("Successfully loaded map zone file %s!\n", zoneFilePath);
         toReturn = true;

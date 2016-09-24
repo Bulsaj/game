@@ -9,24 +9,34 @@ $path = (Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentV
 
 if (!$path)
 {
-	Write-Warning "You should install Source SDK Base 2013 Multiplayer.`nRequesting Steam to install the app..."
-    try {
-        $cmd ="cmd.exe"
-        &$cmd "/c start steam://install/243750/"
+    $path2 = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 243750" -Name InstallLocation).InstallLocation
+    if (!$path2)
+    {
+	    Write-Warning "You should install Source SDK Base 2013 Multiplayer.`nRequesting Steam to install the app..."
+        try {
+            $cmd ="cmd.exe"
+            &$cmd "/c start steam://install/243750/"
+        }
+        catch {
+            Write-Warning "Steam is not running. Can not launch installation pop-up"
+        }
+	    pause
+	    exit
     }
-    catch {
-        Write-Warning "Steam is not running. Can not launch installation pop-up"
+    else 
+    {
+        ($path = $path2)
     }
-	pause
-	exit
 }
 
 $hl2exe = Join-Path $path hl2.exe
-$hl2args = "-game momentum -novid +developer 2 +sv_cheats 1 -console"
+$hl2args = "-game momentum -window -w 1600 -h 900 -novid +developer 2 -console"
 
 $momentum_sym = Join-Path $path momentum
 $momentum = [System.IO.Path]::GetFullPath("..\game\momentum")
 cmd /c mklink /d $momentum_sym $momentum
+
+"`nSymbolic link created in ..\Source SDK Base 2013 Multiplayer\momentum to ..\game\momentum\"
 
 $data = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -46,4 +56,4 @@ $data = @"
 
 $data | Out-File game\client\client_momentum.vcxproj.user utf8
 
-Print "Data added to client_hl2mp.vcxproj"
+"`nDebug and launch added to client_momentum.vcxproj`n"

@@ -15,19 +15,33 @@ Scheme
 	Colors
 	{
 		// base colors
-		"Orange"			"255 176 0 255"
-		"OrangeDim"			"255 176 0 120"
-		"LightOrange"		"188 112 0 128"
+		"White"				"255 255 255 255"
+		"Light Gray"		"211 211 211 100"
+		"Gray" 				"128 128 128 150"
+		"Dark Gray" 		"64 64 64 200"
 		
-		"Red"				"192 28 0 140"
-		"Black"				"0 0 0 196"
-		"TransparentBlack"	"0 0 0 196"
-		"TransparentLightBlack"	"0 0 0 90"
+        "Light Blue" "51 122 183 255"
+        "Dark Blue" "22 69 119 255"
+        
+		"Red"                "192 28 0 140"
+		"Black"                "0 0 0 196"
+		"TransparentBlack"    "0 0 0 196"
+		"TransparentLightBlack"    "0 0 0 90"
+	
+		"Blank"                "0 0 0 1"
 
-		"Blank"				"0 0 0 0"
-		"ForTesting"		"255 0 0 32"
-		"ForTesting_Magenta"	"255 0 255 255"
-		"ForTesting_MagentaDim"	"255 0 255 120"
+		//"MOM.Panel.Bg"				"211 211 211 50"
+		"MomentumBlue"	"30 150 210 255"
+		"MomentumRed"	"255 75 75 255"
+
+		"MOM.Panel.Fg"				"255 255 255 125"
+		"MOM.Panel.Bg"				"0 0 0 76"
+		"MOM.Speedometer.Normal"	"255 255 255 125"
+		"MOM.Speedometer.Increase"	"30 150 210 255"
+		"MOM.Speedometer.Decrease"	"255 75 75 255"
+        "MOM.Compare.Gain" "30 150 210 255"
+        "MOM.Compare.Loss" "255 75 75 255"
+        "MOM.Compare.Tie" "255 255 255 255"
 	}
 	
 	///////////////////// BASE SETTINGS ////////////////////////
@@ -36,10 +50,10 @@ Scheme
 	// controls use these to determine their settings
 	BaseSettings
 	{
-		"FgColor"			"0 128 255 255"
+		"FgColor"			"255 255 255 255"
 		"BgColor"			"0 0 0 76"
 
-		"Panel.FgColor"			"0 128 255 100"
+		"Panel.FgColor"			"255 255 255 255"
 		"Panel.BgColor"			"0 0 0 76"
 		
 		"BrightFg"		"128 255 255 255"
@@ -81,26 +95,26 @@ Scheme
 
 ///HERE
 				// vgui_controls color specifications
-		Border.Bright					"LightOrange"		// the lit side of a control
-		Border.Dark						"LightOrange"		// the dark/unlit side of a control
+		Border.Bright					"Gray"		// the lit side of a control
+		Border.Dark						"Gray"		// the dark/unlit side of a control
 		Border.Selection				"Blank"				// the additional border color for displaying the default/selected button
 
-		Button.TextColor				"Orange"
+		Button.TextColor				"White"
 		Button.BgColor					"Blank"
-		Button.ArmedTextColor			"Orange"
-		Button.ArmedBgColor				"Red"
-		Button.DepressedTextColor		"Orange"
-		Button.DepressedBgColor			"Red"
+		Button.ArmedTextColor			"White"
+		Button.ArmedBgColor				"MomentumBlue"
+		Button.DepressedTextColor		"White"
+		Button.DepressedBgColor			"MomentumBlue"
 
-		CheckButton.TextColor			"Orange"
-		CheckButton.SelectedTextColor	"Orange"
+		CheckButton.TextColor			"White"
+		CheckButton.SelectedTextColor	"White"
 		CheckButton.BgColor				"TransparentBlack"
 		CheckButton.Border1  			"Border.Dark" 		// the left checkbutton border
 		CheckButton.Border2  			"Border.Bright"		// the right checkbutton border
-		CheckButton.Check				"Orange"				// color of the check itself
+		CheckButton.Check				"White"				// color of the check itself
 
-		ComboBoxButton.ArrowColor		"Orange"
-		ComboBoxButton.ArmedArrowColor	"Orange"
+		ComboBoxButton.ArrowColor		"White"
+		ComboBoxButton.ArmedArrowColor	"White"
 		ComboBoxButton.BgColor			"TransparentBlack"
 		ComboBoxButton.DisabledBgColor	"Blank"
 
@@ -119,75 +133,75 @@ Scheme
 		FrameSystemButton.BgColor		"Blank"
 		FrameSystemButton.Icon			""
 		FrameSystemButton.DisabledIcon	""
-		FrameTitleBar.TextColor			"Orange"
+		FrameTitleBar.TextColor			"White"
 		FrameTitleBar.BgColor			"Blank"
-		FrameTitleBar.DisabledTextColor	"Orange"
+		FrameTitleBar.DisabledTextColor	"White"
 		FrameTitleBar.DisabledBgColor	"Blank"
 
-		GraphPanel.FgColor				"Orange"
+		GraphPanel.FgColor				"White"
 		GraphPanel.BgColor				"TransparentBlack"
 
-		Label.TextDullColor				"Orange"
-		Label.TextColor					"Orange"
-		Label.TextBrightColor			"Orange"
-		Label.SelectedTextColor			"Orange"
+		Label.TextDullColor				"White"
+		Label.TextColor					"White"
+		Label.TextBrightColor			"White"
+		Label.SelectedTextColor			"White"
 		Label.BgColor					"Blank"
 		Label.DisabledFgColor1			"Blank"
-		Label.DisabledFgColor2			"LightOrange"
+		Label.DisabledFgColor2			"Gray"
 
-		ListPanel.TextColor					"Orange"
+		ListPanel.TextColor					"White"
 		ListPanel.BgColor					"TransparentBlack"
 		ListPanel.SelectedTextColor			"Black"
-		ListPanel.SelectedBgColor			"Red"
-		ListPanel.SelectedOutOfFocusBgColor	"Red"
-		ListPanel.EmptyListInfoTextColor	"Orange"
+		ListPanel.SelectedBgColor			"Light Blue"
+		ListPanel.SelectedOutOfFocusBgColor	"Dark Blue"
+		ListPanel.EmptyListInfoTextColor	"White"
 
-		Menu.TextColor					"Orange"
+		Menu.TextColor					"White"
 		Menu.BgColor					"TransparentBlack"
-		Menu.ArmedTextColor				"Orange"
-		Menu.ArmedBgColor				"Red"
+		Menu.ArmedTextColor				"White"
+		Menu.ArmedBgColor				"Light Blue"
 		Menu.TextInset					"6"
 
-		Chat.TypingText					"Orange"
+		Chat.TypingText					"White"
 
-		Panel.FgColor					"OrangeDim"
+		Panel.FgColor					"WhiteDim"
 		Panel.BgColor					"blank"
 
-		ProgressBar.FgColor				"Orange"
+		ProgressBar.FgColor				"White"
 		ProgressBar.BgColor				"TransparentBlack"
 
-		PropertySheet.TextColor			"Orange"
-		PropertySheet.SelectedTextColor	"Orange"
+		PropertySheet.TextColor			"White"
+		PropertySheet.SelectedTextColor	"White"
 		PropertySheet.TransitionEffectTime	"0.25"	// time to change from one tab to another
 
-		RadioButton.TextColor			"Orange"
-		RadioButton.SelectedTextColor	"Orange"
+		RadioButton.TextColor			"White"
+		RadioButton.SelectedTextColor	"White"
 
-		RichText.TextColor				"Orange"
+		RichText.TextColor				"White"
 		RichText.BgColor				"Blank"
-		RichText.SelectedTextColor		"Orange"
+		RichText.SelectedTextColor		"White"
 		RichText.SelectedBgColor		"Blank"
 
-				ScrollBarButton.FgColor				"Orange"
+		ScrollBarButton.FgColor				"White"
 		ScrollBarButton.BgColor				"Blank"
-		ScrollBarButton.ArmedFgColor		"Orange"
+		ScrollBarButton.ArmedFgColor		"White"
 		ScrollBarButton.ArmedBgColor		"Blank"
-		ScrollBarButton.DepressedFgColor	"Orange"
+		ScrollBarButton.DepressedFgColor	"White"
 		ScrollBarButton.DepressedBgColor	"Blank"
 
 		ScrollBarSlider.FgColor				"Blank"		// nob color
 		ScrollBarSlider.BgColor				"Blank"		// slider background color
 
-		SectionedListPanel.HeaderTextColor	"Orange"
+		SectionedListPanel.HeaderTextColor	"White"
 		SectionedListPanel.HeaderBgColor	"Blank"
 		SectionedListPanel.DividerColor		"Black"
-		SectionedListPanel.TextColor		"Orange"
-		SectionedListPanel.BrightTextColor	"Orange"
+		SectionedListPanel.TextColor		"White"
+		SectionedListPanel.BrightTextColor	"White"
 		SectionedListPanel.BgColor			"TransparentLightBlack"
-		SectionedListPanel.SelectedTextColor			"Black"
-		SectionedListPanel.SelectedBgColor				"Red"
-		SectionedListPanel.OutOfFocusSelectedTextColor	"Black"
-		SectionedListPanel.OutOfFocusSelectedBgColor	"255 255 255 32"
+		SectionedListPanel.SelectedTextColor			"White"
+		SectionedListPanel.SelectedBgColor				"Dark Blue"
+		SectionedListPanel.OutOfFocusSelectedTextColor	"White"
+		SectionedListPanel.OutOfFocusSelectedBgColor	"Light Blue"
 
 		Slider.NobColor				"108 108 108 255"
 		Slider.TextColor			"127 140 127 255"
@@ -195,19 +209,19 @@ Scheme
 		Slider.DisabledTextColor1	"117 117 117 255"
 		Slider.DisabledTextColor2	"30 30 30 255"
 
-		TextEntry.TextColor			"Orange"
+		TextEntry.TextColor			"White"
 		TextEntry.BgColor			"TransparentBlack"
-		TextEntry.CursorColor		"Orange"
-		TextEntry.DisabledTextColor	"Orange"
+		TextEntry.CursorColor		"Black"
+		TextEntry.DisabledTextColor	"White"
 		TextEntry.DisabledBgColor	"Blank"
 		TextEntry.SelectedTextColor	"Black"
 		TextEntry.SelectedBgColor	"Red"
 		TextEntry.OutOfFocusSelectedBgColor	"Red"
 		TextEntry.FocusEdgeColor	"TransparentBlack"
 
-		ToggleButton.SelectedTextColor	"Orange"
+		ToggleButton.SelectedTextColor	"White"
 
-		Tooltip.TextColor			"TransparentBlack"
+		Tooltip.TextColor			"White"
 		Tooltip.BgColor				"Red"
 
 		TreeView.BgColor			"TransparentBlack"
@@ -215,7 +229,7 @@ Scheme
 		WizardSubPanel.BgColor		"Blank"
 
 		// scheme-specific colors
-		"FgColor"		"Orange"
+		"FgColor"		"White"
 		"BgColor"		"TransparentBlack"
 
 		"ViewportBG"		"Blank"
@@ -223,7 +237,7 @@ Scheme
 		"team1"			"255 64 64 255" // CT's
 		"team2"			"153 204 255 255" // T's
 
-		"MapDescriptionText"	"Orange" // the text used in the map description window
+		"MapDescriptionText"	"White" // the text used in the map description window
 		"CT_Blue"			"153 204 255 255"
 		"T_Red"				"255 64 64 255"
 		"Hostage_Yellow"	"Panel.FgColor"
@@ -276,6 +290,19 @@ Scheme
 	// describes all the fonts
 	Fonts
 	{
+		MomentumIcons
+		{
+			"1"
+			{
+				"name"		"MomIcons"
+				"tall"		"12"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+        
 		Icons
 		{
 			"1"
@@ -644,6 +671,43 @@ Scheme
 				"name"		"obsidian"
 				"tall"		"16"
 				"weight"	"1000"
+				"additive"	"1"
+				"antialias" "1"
+				"custom"	"1"
+			}
+		}
+		HudNumbersSmallBold
+		{
+			"1"
+			{
+				"name"		"obsidian"
+				"tall"		"16"
+				"weight"	"1000"
+				"additive"	"1"
+				"antialias" "1"
+				"custom"	"1"
+				"bold"	"1"
+			}
+		}
+		HudNumbersVerySmall
+		{
+			"1"
+			{
+				"name"		"obsidian"
+				"tall"		"11"
+				"weight"	"1000"
+				"additive"	"1"
+				"antialias" "1"
+				"custom"	"1"
+			}
+		}
+		HudNumbersExtremelySmall
+		{
+			"1"
+			{
+				"name"		"obsidian"
+				"tall"		"9"
+				"weight"	"600"
 				"additive"	"1"
 				"antialias" "1"
 				"custom"	"1"
@@ -1034,7 +1098,29 @@ Scheme
 				"additive" "1"
 				"antialias" "1"
 		   }
-		}	
+		}
+		"BigNoodle"
+		{
+			"1"
+			{
+				"name" "BigNoodleTitling"
+				"tall" "32"
+				"weight" "0"
+				"additive" "1"
+				"antialias" "1"
+			}
+		}
+		"BigNoodleSmall"
+		{
+			"1"
+			{
+				"name" "BigNoodleTitling"
+				"tall" "16"
+				"weight" "0"
+				"additive" "1"
+				"antialias" "1"
+			}
+		}
 	}
 
 		//////////////////// BORDERS //////////////////////////////
@@ -1688,14 +1774,13 @@ Scheme
 	//
 	// specifies all the custom (non-system) font files that need to be loaded to service the above described fonts
 	CustomFontFiles
-	{		
+	{
 		"1"		"resource/HALFLIFE2.ttf"
-		"1"		"resource/HL2MP.ttf"
-		"1"		"resource/obsidian.ttf"
-		"1"		"resource/obsidianweaps.ttf"
-		"1"		"resource/custom.ttf"
-		"2"		"resource/HL2crosshairs.ttf"
-		"2"		"resource/cs.ttf"
+		"1"		"resource/MomIcons.ttf"
+		//"2"		"resource/HL2MP.ttf"
+		"3"		"resource/HL2crosshairs.ttf"
+		//"4"		"resource/cs.ttf"
+        "1" "resource/BigNoodleTitling.ttf"
 	}
 
 }

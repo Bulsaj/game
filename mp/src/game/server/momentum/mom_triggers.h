@@ -7,6 +7,26 @@
 #include "triggers.h"
 #include "filters.h"
 #include "func_break.h"
+#include "mom_gamerules.h"
+
+// spawnflags 
+enum {
+    //CTriggerTimerStart
+    SF_LIMIT_LEAVE_SPEED = 0x0001,           // Limit speed if player bhopped in start zone?
+    SF_USE_LOOKANGLES = 0x0002,             // Use look angles?
+    //CTriggerOneHop
+    SF_TELEPORT_RESET_ONEHOP = 0x0010,      // Reset hop state if player hops onto another different onehop
+    //CTriggerLimitMove
+    LIMIT_JUMP = 0x0020,                    //prevent player from jumping
+    LIMIT_CROUCH = 0x0040,                  //prevent player from croching
+    LIMIT_BHOP = 0x0080,                    //prevent player from bhopping
+    //CFuncShootBost and CTriggerMomentumPush
+    SF_PUSH_DIRECTION_AS_FINAL_FORCE = 0x0100,  // Use the direction vector as final force instead of calculating it by force amount
+    //CTriggerMomentumPush
+    SF_PUSH_ONETOUCH = 0x0200,               // Only allow for one touch
+    SF_PUSH_ONSTART = 0x0400,                // Modify player velocity on StartTouch
+    SF_PUSH_ONEND = 0x0800,                  // Modify player velocity on EndTouch
+};
 
 // CBaseMomentumTrigger
 class CBaseMomentumTrigger : public CTriggerMultiple
@@ -14,7 +34,12 @@ class CBaseMomentumTrigger : public CTriggerMultiple
     DECLARE_CLASS(CBaseMomentumTrigger, CTriggerMultiple);
 
 public:
-    virtual void Spawn();
+    void Spawn() override;
+    //Used to calculate if a position is inside of this trigger's bounds
+    bool ContainsPosition(const Vector &pos)
+    {
+        return CollisionProp()->IsPointInBounds(pos);
+    }
 };
 
 // CTriggerTimerStop
@@ -23,7 +48,8 @@ class CTriggerTimerStop : public CBaseMomentumTrigger
     DECLARE_CLASS(CTriggerTimerStop, CBaseMomentumTrigger);
 
 public:
-    void StartTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
+    void EndTouch(CBaseEntity*) override;
 };
 
 // CTriggerTeleportEnt
@@ -34,7 +60,7 @@ class CTriggerTeleportEnt : public CBaseMomentumTrigger
 
 public:
     //This void teleports the touching entity!
-    void StartTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
     // Used by children classes to define what ent to teleport to (see CTriggerOneHop)
     void SetDestinationEnt(CBaseEntity *ent) { pDestinationEnt = ent; }
     bool ShouldStopPlayer() { return m_bResetVelocity; }
@@ -57,7 +83,7 @@ class CTriggerCheckpoint : public CBaseMomentumTrigger
     DECLARE_DATADESC();
 
 public:
-    void StartTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
     // the following is only used by CFilterCheckpoint
     virtual int GetCheckpointNumber() { return m_iCheckpointNumber; }
     // The following is used by mapzones.cpp
@@ -75,8 +101,9 @@ class CTriggerStage : public CTriggerCheckpoint
     DECLARE_DATADESC();
 
 public:
-    void StartTouch(CBaseEntity*);
-    void Spawn()
+    void StartTouch(CBaseEntity*) override;
+    void EndTouch(CBaseEntity*) override;
+    void Spawn() override
     {
         SetCheckpointNumber(-1);
         BaseClass::Spawn();
@@ -84,7 +111,9 @@ public:
     //Used by CTimer and CStageFilter
     virtual int GetStageNumber() { return m_iStageNumber; }
     void SetStageNumber(int newInt) { m_iStageNumber = newInt; }
-    int GetCheckpointNumber() { return -1; }//Override, use GetStageNumber()
+    //Override, use GetStageNumber()
+    int GetCheckpointNumber() override
+    { return -1; }
 
 private:
     int m_iStageNumber;
@@ -97,38 +126,35 @@ class CTriggerTimerStart : public CTriggerStage
     DECLARE_DATADESC();
 
 public:
-    void EndTouch(CBaseEntity*);
-    void StartTouch(CBaseEntity*);
-    void Spawn();
-    // The start is always the first stage/checkpoint
-    int GetCheckpointNumber() { return -1; }//Override
-    int GetStageNumber() { return 1; }
-    float GetMaxLeaveSpeed() { return m_fMaxLeaveSpeed; }
-    void SetMaxLeaveSpeed(float pMaxSpeed);
-    bool IsLimitingSpeed() { return HasSpawnFlags(SF_LIMIT_LEAVE_SPEED); }
-    void SetIsLimitingSpeed(bool pIsLimitingSpeed);
-    bool IsLimitingSpeedOnlyXY() { return HasSpawnFlags(SF_LIMIT_LEAVE_SPEED_ONLYXY); }
-    void SetIsLimitingSpeedOnlyXY(bool pIsLimitingSpeedOnlyXY);
+    void EndTouch(CBaseEntity*) override;
+    void StartTouch(CBaseEntity*) override;
+    void Spawn() override;
 
-    void SetHasLookAngles(bool bHasLook);
-    bool GetHasLookAngles() { return HasSpawnFlags(SF_USE_LOOKANGLES); }
+    // The start is always the first stage/checkpoint
+    int GetCheckpointNumber() override
+    { return -1; }//Override
+    int GetStageNumber() override
+    { return 1; }
+    float GetMaxLeaveSpeed() { return m_fBhopLeaveSpeed; }
+    void SetMaxLeaveSpeed(float maxLeaveSpeed);
     void SetLookAngles(QAngle newang);
     QAngle GetLookAngles() { return m_angLook; }
+    // MOM_TODO: Is this even used right now??
+    void SetPunishSpeed(float pPunishSpeed);
+    float GetPunishSpeed() { return m_fPunishSpeed; }
+
+    //spawnflags
+    bool IsLimitingSpeed() { return HasSpawnFlags(SF_LIMIT_LEAVE_SPEED); }
+    void SetIsLimitingSpeed(bool pIsLimitingSpeed);
+    void SetHasLookAngles(bool bHasLook);
+    bool GetHasLookAngles() { return HasSpawnFlags(SF_USE_LOOKANGLES); }
 
 private:
     QAngle m_angLook = QAngle(0, 0, 0);
 
-    // How fast can the player leave the start trigger?
-    float m_fMaxLeaveSpeed = 280;
-
-    // MOM_TODO: Why aren't these defines?
-
-    // Limit max leave speed to m_fMaxLeaveSpeed?
-    const int SF_LIMIT_LEAVE_SPEED = 0x2;
-    // Use look angles?
-    const int SF_USE_LOOKANGLES = 0x4;
-    // Limit speed without taking into account hvel (Z axis)
-    const int SF_LIMIT_LEAVE_SPEED_ONLYXY = 0x8;
+    //How fast can player leave start trigger if they bhopped?
+    float m_fBhopLeaveSpeed = 250;
+    float m_fPunishSpeed = 200;
 };
 
 // CFilterCheckpoint
@@ -138,7 +164,7 @@ class CFilterCheckpoint : public CBaseFilter
     DECLARE_DATADESC();
 
 public:
-    bool PassesFilterImpl(CBaseEntity*, CBaseEntity*);
+    bool PassesFilterImpl(CBaseEntity*, CBaseEntity*) override;
 
 private:
     int m_iCheckpointNumber;
@@ -151,7 +177,7 @@ class CTriggerTeleportCheckpoint : public CTriggerTeleportEnt
     DECLARE_CLASS(CTriggerTeleportCheckpoint, CTriggerTeleportEnt);
 
 public:
-    void StartTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
 };
 
 // CTriggerOnehop
@@ -161,19 +187,20 @@ class CTriggerOnehop : public CTriggerTeleportEnt
     DECLARE_DATADESC();
 
 public:
-    void StartTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
     float GetHoldTeleportTime() { return m_fMaxHoldSeconds; }
     void SetHoldTeleportTime(float pHoldTime) { m_fMaxHoldSeconds = pHoldTime; }
-    void Think();
-    void AfterTeleport() { m_fStartTouchedTime = -1.0f; SetDestinationEnt(NULL); }
+    void Think() override;
+    void AfterTeleport() override
+    {
+        m_fStartTouchedTime = -1.0f; SetDestinationEnt(nullptr);
+    }
 
 private:
     // The time that the player initally touched the trigger
     float m_fStartTouchedTime = 0.0f;
     // Seconds to hold before activating the teleport
     float m_fMaxHoldSeconds = 1;
-    // Reset hop state if player hops onto another different onehop
-    const int SF_TELEPORT_RESET_ONEHOP = 0x2;
 
 };
 
@@ -183,7 +210,7 @@ class CTriggerResetOnehop : public CBaseMomentumTrigger
     DECLARE_CLASS(CTriggerResetOnehop, CBaseMomentumTrigger);
 
 public:
-    void StartTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
 
 };
 
@@ -194,12 +221,15 @@ class CTriggerMultihop : public CTriggerTeleportEnt
     DECLARE_DATADESC();
 
 public:
-    void StartTouch(CBaseEntity*);
-    void EndTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
+    void EndTouch(CBaseEntity*) override;
     float GetHoldTeleportTime() { return m_fMaxHoldSeconds; }
     void SetHoldTeleportTime(float pHoldTime) { m_fMaxHoldSeconds = pHoldTime; }
-    void Think();
-    void AfterTeleport() { m_fStartTouchedTime = -1.0f; SetDestinationEnt(NULL); }
+    void Think() override;
+    void AfterTeleport() override
+    {
+        m_fStartTouchedTime = -1.0f; SetDestinationEnt(nullptr);
+    }
 
 private:
     // The time that the player initally touched the trigger. -1 if not checking for teleport
@@ -218,14 +248,30 @@ class CTriggerUserInput : public CBaseMomentumTrigger
 public:
     enum key { forward, back, moveleft, moveright, jump, duck, attack, attack2, reload };
     key m_eKey;
-    void Think();
-    void Spawn();
+    void Think() override;
+    void Spawn() override;
     COutputEvent m_OnKeyPressed;
 
 private:
     int m_ButtonRep;
 
 };
+
+// CTriggerLimitMovement
+class CTriggerLimitMovement : public CBaseMomentumTrigger
+{
+    DECLARE_CLASS(CTriggerLimitMovement, CBaseMomentumTrigger);
+
+public:
+    void Think() override;
+    void StartTouch(CBaseEntity *pOther) override;
+    void EndTouch(CBaseEntity *pOther) override;
+
+private:
+    CountdownTimer m_BhopTimer;
+    const float FL_BHOP_TIMER = 0.15f;
+};
+
 
 // CFuncShootBoost
 class CFuncShootBoost : public CBreakable
@@ -234,8 +280,8 @@ class CFuncShootBoost : public CBreakable
     DECLARE_DATADESC();
 
 public:
-    void Spawn();
-    int OnTakeDamage(const CTakeDamageInfo &info);
+    void Spawn() override;
+    int OnTakeDamage(const CTakeDamageInfo &info) override;
     // Force in units per seconds applied to the player
     float m_fPushForce;
     // 0: No
@@ -247,8 +293,6 @@ public:
     Vector m_vPushDir;
     // If not null, dictates which entity the attacker must be touching for the func to work
     CBaseEntity *m_Destination;
-    // Use the direction vector as final force instead of calculating it by force amount
-    const int SF_PUSH_DIRECTION_AS_FINAL_FORCE = 0x2;
 };
 
 // CTriggerMomentumPush
@@ -258,13 +302,16 @@ class CTriggerMomentumPush : public CTriggerTeleportEnt
     DECLARE_DATADESC();
 
 public:
-    void StartTouch(CBaseEntity*);
-    void EndTouch(CBaseEntity*);
+    void StartTouch(CBaseEntity*) override;
+    void EndTouch(CBaseEntity*) override;
     // Called when (and by) either a StartTouch() or EndTouch() event happens and their requisites are met
     void OnSuccessfulTouch(CBaseEntity*);
     float GetHoldTeleportTime() { return m_fMaxHoldSeconds; }
     void SetHoldTeleportTime(float pHoldTime) { m_fMaxHoldSeconds = pHoldTime; }
-    void AfterTeleport() { m_fStartTouchedTime = -1.0f; SetDestinationEnt(NULL); }
+    void AfterTeleport() override
+    {
+        m_fStartTouchedTime = -1.0f; SetDestinationEnt(nullptr);
+    }
 
 private:
     // The time that the player initally touched the trigger
@@ -281,13 +328,5 @@ private:
     Vector m_vPushDir;
     // Pointer to the destination entity if a teleport is needed
     CBaseEntity *m_Destination;
-    // Only allow for one touch
-    const int SF_PUSH_ONETOUCH = 0x2;
-    // Modify player velocity on StartTouch
-    const int SF_PUSH_ONSTART = 0x4;
-    // Modify player velocity on EndTouch
-    const int SF_PUSH_ONEND = 0x8;
-    // Use the direction vector as final force instead of calculating it by force amount
-    const int SF_PUSH_DIRECTION_AS_FINAL_FORCE = 0x16;
 };
 #endif // TIMERTRIGGERS_H

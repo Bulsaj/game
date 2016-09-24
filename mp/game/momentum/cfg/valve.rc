@@ -14,3 +14,6 @@ exec autoexec.cfg
 stuffcmds
 sv_unlockedchapters 99 //Random background selection
 startupmenu
+
+//FOR REAL FIXEXS DEMO PLAYBACK INTERP ISSUES
+demo_interplimit 9999999

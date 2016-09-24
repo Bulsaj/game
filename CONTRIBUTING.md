@@ -1,18 +1,19 @@
-# About contributing
-Contributing to the mod is very easy. Just fork the repo, make your desired changes
-and then send us a pull request and we'll happly revise it. Once your first pull request
-is approved, you can ask us to invite you to the Momentum Development Team, so you can
-help us further (But it's not necessary, and if you ask us we'll very happy invite you either
-way even if you didn't submit a pull request!)
+# About Contributing
+Contributing to this project is very easy. Just fork the repo, make your desired changes
+and then send us a pull request and we'll happily revise it.
+
+Note: We use Hungarian Notation (Systems), spaces instead of tabs, and ClangFormat for any custom file added to the project.
+
+If your work is to be used in our project, we will credit you with a Contributor role on [our credits page.](http://momentum-mod.org/about) If you wish to have a certain name in this credit, make sure to mention it in the comments of your Pull Request, otherwise, we'll just use your GitHub username.
+
+If we like your work enough, we may invite you to be on the team!
+
+If you have any other concerns, feel free to [contact us!](http://momentum-mod.org/contact)
+
+**All the help we can get is very welcome!**
 
 
-When contributing, don't forget to add yourself to [sp/game/momentum/scripts/credits.txt](sp/game/momentum/scripts/credits.txt)
-under *Contributors* (You can find instructions of how-to inside said file)
-
-**Every help we can get is welcomed**
-
-
-Also, *as this is a Soruce mod*, VALVe's contributing conditions apply here as well:
+Also, *as this is a Source mod*, VALVe's contributing conditions apply here as well:
 
 
 *As a condition of providing a Contribution, you agree that:* 

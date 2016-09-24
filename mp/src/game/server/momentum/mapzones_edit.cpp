@@ -10,7 +10,7 @@ static ConVar mom_zone_grid("mom_zone_grid", "8", FCVAR_CHEAT, "Set grid size. 0
 static ConVar mom_zone_defzone("mom_zone_defzone", "start", FCVAR_CHEAT, "If no zone type is passed to mom_zone_mark, use this.\n");
 static ConVar mom_zone_start_limitspdmethod("mom_zone_start_limitspdmethod", "1", FCVAR_CHEAT, "0 = Take into account player z-velocity, 1 = Ignore z-velocity.\n", true, 0, true, 1);
 static ConVar mom_zone_stage_num("mom_zone_stage_num", "0", FCVAR_CHEAT, "Set stage number. Should start from 2. 0 to automatically find one.\n", true, 0, false, 0);
-static ConVar mom_zone_start_maxleavespeed("mom_zone_start_maxleavespeed", "290", FCVAR_CHEAT, "Max leave speed. 0 to disable.\n", true, 0, false, 0);
+static ConVar mom_zone_start_maxbhopleavespeed("mom_zone_start_maxbhopleavespeed", "250", FCVAR_CHEAT, "Max leave speed if player bhopped. 0 to disable.\n", true, 0, false, 0);
 //static ConVar mom_zone_cp_num( "mom_zone_cp_num", "0", FCVAR_CHEAT, "Checkpoint number. 0 to automatically find one." );
 
 
@@ -55,7 +55,7 @@ void CC_Mom_ZoneDelete(const CCommand &args)
             char szDelete[64];
             if (ZoneTypeToClass(g_MapzoneEdit.ShortNameToZoneType(args[1]), szDelete))
             {
-                CBaseEntity *pEnt = gEntList.FindEntityByClassname(NULL, szDelete);
+                CBaseEntity *pEnt = gEntList.FindEntityByClassname(nullptr, szDelete);
                 while (pEnt)
                 {
                     UTIL_Remove(pEnt);
@@ -88,7 +88,7 @@ void CC_Mom_ZoneSetLook(const CCommand &args)
         yaw = pPlayer->EyeAngles()[1];
     }
 
-    CBaseEntity *pEnt = gEntList.FindEntityByClassname(NULL, "trigger_momentum_timer_start");
+    CBaseEntity *pEnt = gEntList.FindEntityByClassname(nullptr, "trigger_momentum_timer_start");
     CTriggerTimerStart *pStart;
 
     while (pEnt)
@@ -140,14 +140,14 @@ void CC_Mom_ZoneMark(const CCommand &args)
 
             CBaseEntity *pEnt;
 
-            pEnt = gEntList.FindEntityByClassname(NULL, "trigger_momentum_timer_start");
+            pEnt = gEntList.FindEntityByClassname(nullptr, "trigger_momentum_timer_start");
             while (pEnt)
             {
                 startnum++;
                 pEnt = gEntList.FindEntityByClassname(pEnt, "trigger_momentum_timer_start");
             }
 
-            pEnt = gEntList.FindEntityByClassname(NULL, "trigger_momentum_timer_stop");
+            pEnt = gEntList.FindEntityByClassname(nullptr, "trigger_momentum_timer_stop");
             while (pEnt)
             {
                 endnum++;
@@ -258,20 +258,19 @@ void CMapzoneEdit::Build(Vector *aimpos, int type, int forcestage)
 void CMapzoneEdit::SetZoneProps(CBaseEntity *pEnt)
 {
     CTriggerTimerStart *pStart = dynamic_cast<CTriggerTimerStart *>(pEnt);
+    //validate pointers
     if (pStart)
     {
-        if (mom_zone_start_maxleavespeed.GetFloat() > 0.0)
+        //bhop speed limit
+        if (mom_zone_start_maxbhopleavespeed.GetFloat() > 0.0)
         {
-            pStart->SetMaxLeaveSpeed(mom_zone_start_maxleavespeed.GetFloat());
+            pStart->SetMaxLeaveSpeed(mom_zone_start_maxbhopleavespeed.GetFloat());
             pStart->SetIsLimitingSpeed(true);
         }
         else
         {
             pStart->SetIsLimitingSpeed(false);
         }
-
-        pStart->SetIsLimitingSpeedOnlyXY(mom_zone_start_limitspdmethod.GetBool());
-
         return;
     }
 
@@ -287,7 +286,7 @@ void CMapzoneEdit::SetZoneProps(CBaseEntity *pEnt)
             int higheststage = 1;
             CTriggerStage *pTempStage;
 
-            CBaseEntity *pTemp = gEntList.FindEntityByClassname(NULL, "trigger_momentum_timer_stage");
+            CBaseEntity *pTemp = gEntList.FindEntityByClassname(nullptr, "trigger_momentum_timer_stage");
             while (pTemp)
             {
                 pTempStage = static_cast<CTriggerStage *>(pTemp);
@@ -364,6 +363,14 @@ void CMapzoneEdit::Update()
         {
             m_nBuildStage = BUILDSTAGE_NONE;
             m_bEditing = true;
+            if (!m_bFirstEdit)
+            {
+                CSingleUserRecipientFilter filter(UTIL_GetLocalPlayer());
+                filter.MakeReliable();
+                UserMessageBegin(filter, "MB_EditingZone");
+                MessageEnd();
+            }
+            m_bFirstEdit = true;
         }
     }
     else

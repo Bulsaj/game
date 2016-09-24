@@ -1,4 +1,4 @@
-@include "base.fgd"
+            @include "base.fgd"
 
 //-------------------------------------------------------------------------
 //
@@ -33,13 +33,12 @@
 
 @SolidClass base(Trigger) = trigger_momentum_timer_start : "Trigger that starts the timer." 
 [
-	leavespeed(float) : "Max leave speed" : 290 : "Max speed (Units Per Second) the player will be able to leave the trigger if LIMIT LEAVE SPEED flag is set."
+	bhopleavespeed(float) : "Max leave speed if player bhopped" : 250 : "Max speed (Units Per Second) the player will be able to leave the trigger if they bhopped inside the start zone, and 'Limit leave speed if player bhopped' flag is set."
 	lookangles(angle) : "Look angles" : "0 0 0" : "Where player will look when teleported to start."
 	spawnflags(flags) =
 	[
-		2 : "Limit leave speed" : 1
-		4 : "Use look angles" : 0
-		8 : "Check only XY for leave speed check" : 1
+		1 : "Limit leave speed" : 1
+		2 : "Use look angles" : 0
 	]
 ]
 
@@ -86,6 +85,16 @@
 	]
 ]
 
+@SolidClass base(Trigger) = trigger_momentum_limitmovement : "Trigger that prevents the player from doing specific movements."
+[
+	spawnflags(flags) = 
+	[ 
+		32: "Prevent the player from jumping" : 0
+		64: "Prevent the player from ducking" : 0
+		128: "Prevent the player from bhopping" : 0
+	]
+]
+
 @FilterClass base(Targetname) = filter_activator_checkpoint : "Filter that checks to see if the player is at or above the given checkpoint number."
 [
 	checkpoint(integer) : "Minimum req. checkpoint" : -2 : "The minimum checkpoint the player needs to be at in order for the filter to accept the activator."
@@ -115,7 +124,7 @@
     ]
     spawnflags(flags) = 
 	[ 
-		2: "Use the direction vector as final force instead of calculating it by force amount" : 0
+		256: "Use the direction vector as final force instead of calculating it by force amount" : 0
 	]
 
     // THIS THROWS AN ERROR, BUT AS IT HIDES IT-> WE STAY WITH IT FOR NOW
@@ -137,23 +146,39 @@
     ]
 	spawnflags(flags) = 
 	[ 
-		2 : "Only allow for one touch before reseting" : 1
-		4 : "Modify player velocity on StartTouch" : 0
-		8 : "Modify player velocity on EndTouch" : 1
-		16 : "Use the direction vector as final force instead of calculating it by force amount" : 1
+		512 : "Only allow for one touch before reseting" : 1
+		1024 : "Modify player velocity on StartTouch" : 0
+		2048 : "Modify player velocity on EndTouch" : 1
+		256 : "Use the direction vector as final force instead of calculating it by force amount" : 1
 	]
 ]
 
-@PointClass base(env_sprite) sprite()  = ent_momentum_collectable : "Collectables that the player can collect"
+//-------------------------------------------------------------------------
+//
+// Weapons
+//
+//-------------------------------------------------------------------------
+@BaseClass color(0 0 200) base(Targetname, Angles) sphere(fademindist) sphere(fademaxdist) = Weapon
 [
-	spawnflags(flags) =
+	spawnflags(Flags) =
 	[
-		1: "Start on" : 1
-		2: "Play Once" : 0
+		1 : "Start constrained" : 0
 	]
-	mode(choices) : "Sets the type of collectable" : 0 =
-    [
-        0 : "Local (Only needed for this map)"
-        1 : "Global (For campaing mode)"
-    ]
+
+	output OnPlayerUse(void) : "Fires when the player +uses this weapon"
+	output OnPlayerPickup(void) : "Fires when the player picks up this weapon"
+
+	fademindist(float) : "Start Fade Dist/Pixels" : -1 : "Distance at which the prop starts to fade (<0 = use fademaxdist). If 'Screen Space Fade' is selected, this represents the number of pixels wide covered by the prop when it starts to fade."
+	fademaxdist(float) : "End Fade Dist/Pixels" : 0 : "Maximum distance at which the prop is visible (0 = don't fade out). If 'Screen Space Fade' is selected, this represents the *minimum* number of pixels wide covered by the prop when it fades."
+	fadescale(float) : "Fade Scale" : 1 : "If you specify a fade in the worldspawn, or if the engine is running under dx7, then the engine will forcibly fade out props even if fademindist/fademaxdist isn't specified." +
+												 " This scale factor gives you some control over the fade. Using 0 here turns off the forcible fades." +
 ]
+
+@PointClass base(Weapon) studio("models/weapons/w_knife_t.mdl") = weapon_knife : "Knife" []
+@PointClass base(Weapon) studio("models/weapons/w_pistol.mdl") = weapon_momentum_pistol : "Pistol" []
+@PointClass base(Weapon) studio("models/weapons/w_smg1.mdl") = weapon_momentum_smg : "SMG" []
+@PointClass base(Weapon) studio("models/weapons/w_irifle.mdl") = weapon_momentum_rifle : "Rifle" []
+@PointClass base(Weapon) studio("models/weapons/w_shotgun.mdl") = weapon_momentum_shotgun : "Shotgun" []
+@PointClass base(Weapon) studio("models/weapons/w_mach_m249para.mdl") = weapon_momentum_lmg : "LMG" []
+@PointClass base(Weapon) studio("models/weapons/w_snip_scout.mdl") = weapon_momentum_sniper : "Sniper" []
+@PointClass base(Weapon) studio("models/weapons/w_eq_fraggrenade.mdl") = weapon_momentum_grenade : "Grenade" []

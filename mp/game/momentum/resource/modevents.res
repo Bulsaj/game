@@ -27,25 +27,51 @@
 
 "modevents"
 {
-	"player_death"				// a game event, name may be 32 charaters long
-	{
-		"userid"	"short"   	// user ID who died				
-		"attacker"	"short"	 	// user ID who killed
-		"weapon"	"string" 	// weapon name killed used 
-	}
-	
-	"teamplay_round_start"			// round restart
-	{
-		"full_reset"	"bool"		// is this a full reset of the map
-	}
-	
-	"spec_target_updated"
+	"zone_enter"//When the player/ghost enters a checkpoint/stage trigger
 	{
 	}
-	
-	"achievement_earned"
+    "zone_exit"//When the player exits the start trigger for the stage
+    {
+    }
+	"run_save"
 	{
-		"player"	"byte"		// entindex of the player
-		"achievement"	"short"		// achievement ID
+		"run_saved"	"bool"
 	}
+    "run_upload"
+    {
+        "run_posted" "bool"
+        "web_msg" "string"//MOM_TODO: fill this with more stuff?
+    }
+	"timer_state"
+	{
+        "ent" "short"
+		"is_running"	"bool"
+	}
+    "map_init"
+    {
+        "is_linear" "bool"
+        "num_zones" "byte"
+    }
+    "spec_target_updated" // Used by the spectator GUI
+    {
+    }
+    "mapfinished_panel_closed"
+    {
+    }
+	"replay_save"
+	{
+		"filename" "string"
+	}
+    "weapon_fire"
+    {
+        "userid" "long"
+        "weapon" "string"
+    }
+    "bullet_impact"
+    {
+        "userid" "long"
+        "x" "float"
+        "y" "float"
+        "z" "float"
+    }
 }
